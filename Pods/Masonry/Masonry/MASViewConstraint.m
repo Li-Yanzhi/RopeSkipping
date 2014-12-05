@@ -7,9 +7,33 @@
 //
 
 #import "MASViewConstraint.h"
+#import "MASConstraint+Private.h"
 #import "MASCompositeConstraint.h"
 #import "MASLayoutConstraint.h"
 #import "View+MASAdditions.h"
+#import <objc/runtime.h>
+
+@interface MAS_VIEW (MASConstraints)
+
+@property (nonatomic, readonly) NSMutableSet *mas_installedConstraints;
+
+@end
+
+@implementation MAS_VIEW (MASConstraints)
+
+static char kInstalledConstraintsKey;
+
+- (NSMutableSet *)mas_installedConstraints {
+    NSMutableSet *constraints = objc_getAssociatedObject(self, &kInstalledConstraintsKey);
+    if (!constraints) {
+        constraints = [NSMutableSet set];
+        objc_setAssociatedObject(self, &kInstalledConstraintsKey, constraints, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return constraints;
+}
+
+@end
+
 
 @interface MASViewConstraint ()
 
@@ -28,9 +52,6 @@
 
 @implementation MASViewConstraint
 
-@synthesize delegate = _delegate;
-@synthesize updateExisting = _updateExisting;
-
 - (id)initWithFirstViewAttribute:(MASViewAttribute *)firstViewAttribute {
     self = [super init];
     if (!self) return nil;
@@ -44,7 +65,7 @@
 
 #pragma mark - NSCoping
 
-- (id)copyWithZone:(NSZone *)zone {
+- (id)copyWithZone:(NSZone __unused *)zone {
     MASViewConstraint *constraint = [[MASViewConstraint alloc] initWithFirstViewAttribute:self.firstViewAttribute];
     constraint.layoutConstant = self.layoutConstant;
     constraint.layoutRelation = self.layoutRelation;
@@ -54,14 +75,20 @@
     return constraint;
 }
 
-#pragma mark - private
+#pragma mark - Public
+
++ (NSArray *)installedConstraintsForView:(MAS_VIEW *)view {
+    return [view.mas_installedConstraints allObjects];
+}
+
+#pragma mark - Private
 
 - (void)setLayoutConstant:(CGFloat)layoutConstant {
     _layoutConstant = layoutConstant;
 
 #if TARGET_OS_MAC && !TARGET_OS_IPHONE
-    if(self.useAnimator) {
-        self.layoutConstraint.animator.constant = layoutConstant;
+    if (self.useAnimator) {
+        [self.layoutConstraint.animator setConstant:layoutConstant];
     } else {
         self.layoutConstraint.constant = layoutConstant;
     }
@@ -80,9 +107,9 @@
 }
 
 - (void)setSecondViewAttribute:(id)secondViewAttribute {
-    if ([secondViewAttribute isKindOfClass:NSNumber.class]) {
-        self.layoutConstant = [secondViewAttribute doubleValue];
-    }  else if ([secondViewAttribute isKindOfClass:MAS_VIEW.class]) {
+    if ([secondViewAttribute isKindOfClass:NSValue.class]) {
+        [self setLayoutConstantWithValue:secondViewAttribute];
+    } else if ([secondViewAttribute isKindOfClass:MAS_VIEW.class]) {
         _secondViewAttribute = [[MASViewAttribute alloc] initWithView:secondViewAttribute layoutAttribute:self.firstViewAttribute.layoutAttribute];
     } else if ([secondViewAttribute isKindOfClass:MASViewAttribute.class]) {
         _secondViewAttribute = secondViewAttribute;
@@ -91,39 +118,9 @@
     }
 }
 
-#pragma mark - NSLayoutConstraint constant proxies
-
-- (id<MASConstraint> (^)(MASEdgeInsets))insets {
-    return ^id(MASEdgeInsets insets){
-        self.insets = insets;
-        return self;
-    };
-}
-
-- (id<MASConstraint> (^)(CGSize))sizeOffset {
-    return ^id(CGSize offset) {
-        self.sizeOffset = offset;
-        return self;
-    };
-}
-
-- (id<MASConstraint> (^)(CGPoint))centerOffset {
-    return ^id(CGPoint offset) {
-        self.centerOffset = offset;
-        return self;
-    };
-}
-
-- (id<MASConstraint> (^)(CGFloat))offset {
-    return ^id(CGFloat offset){
-        self.offset = offset;
-        return self;
-    };
-}
-
 #pragma mark - NSLayoutConstraint multiplier proxies
 
-- (id<MASConstraint> (^)(CGFloat))multipliedBy {
+- (MASConstraint * (^)(CGFloat))multipliedBy {
     return ^id(CGFloat multiplier) {
         NSAssert(!self.hasBeenInstalled,
                  @"Cannot modify constraint multiplier after it has been installed");
@@ -134,7 +131,7 @@
 }
 
 
-- (id<MASConstraint> (^)(CGFloat))dividedBy {
+- (MASConstraint * (^)(CGFloat))dividedBy {
     return ^id(CGFloat divider) {
         NSAssert(!self.hasBeenInstalled,
                  @"Cannot modify constraint multiplier after it has been installed");
@@ -144,9 +141,9 @@
     };
 }
 
-#pragma mark - MASLayoutPriority proxies
+#pragma mark - MASLayoutPriority proxy
 
-- (id<MASConstraint> (^)(MASLayoutPriority))priority {
+- (MASConstraint * (^)(MASLayoutPriority))priority {
     return ^id(MASLayoutPriority priority) {
         NSAssert(!self.hasBeenInstalled,
                  @"Cannot modify constraint priority after it has been installed");
@@ -156,31 +153,10 @@
     };
 }
 
-- (id<MASConstraint> (^)())priorityLow {
-    return ^id{
-        self.priority(MASLayoutPriorityDefaultLow);
-        return self;
-    };
-}
+#pragma mark - NSLayoutRelation proxy
 
-- (id<MASConstraint> (^)())priorityMedium {
-    return ^id{
-        self.priority(MASLayoutPriorityDefaultMedium);
-        return self;
-    };
-}
-
-- (id<MASConstraint> (^)())priorityHigh {
-    return ^id{
-        self.priority(MASLayoutPriorityDefaultHigh);
-        return self;
-    };
-}
-
-#pragma mark - NSLayoutRelation proxies
-
-- (id<MASConstraint> (^)(id))equalityWithRelation:(NSLayoutRelation)relation {
-    return ^id(id attribute) {
+- (MASConstraint * (^)(id, NSLayoutRelation))equalToWithRelation {
+    return ^id(id attribute, NSLayoutRelation relation) {
         if ([attribute isKindOfClass:NSArray.class]) {
             NSAssert(!self.hasLayoutRelation, @"Redefinition of constraint relation");
             NSMutableArray *children = NSMutableArray.new;
@@ -194,8 +170,7 @@
             [self.delegate constraint:self shouldBeReplacedWithConstraint:compositeConstraint];
             return compositeConstraint;
         } else {
-            BOOL layoutConstantUpdate = self.layoutRelation == relation && [attribute isKindOfClass:NSNumber.class];
-            NSAssert(!self.hasLayoutRelation || layoutConstantUpdate, @"Redefinition of constraint relation");
+            NSAssert(!self.hasLayoutRelation || self.layoutRelation == relation && [attribute isKindOfClass:NSValue.class], @"Redefinition of constraint relation");
             self.layoutRelation = relation;
             self.secondViewAttribute = attribute;
             return self;
@@ -203,29 +178,29 @@
     };
 }
 
-- (id<MASConstraint> (^)(id))equalTo {
-    return [self equalityWithRelation:NSLayoutRelationEqual];
-}
-
-- (id<MASConstraint> (^)(id))greaterThanOrEqualTo {
-    return [self equalityWithRelation:NSLayoutRelationGreaterThanOrEqual];
-}
-
-- (id<MASConstraint> (^)(id))lessThanOrEqualTo {
-    return [self equalityWithRelation:NSLayoutRelationLessThanOrEqual];
-}
-
 #pragma mark - Semantic properties
 
-- (id<MASConstraint>)with {
+- (MASConstraint *)with {
     return self;
+}
+
+- (MASConstraint *)and {
+    return self;
+}
+
+#pragma mark - attribute chaining
+
+- (MASConstraint *)addConstraintWithLayoutAttribute:(NSLayoutAttribute)layoutAttribute {
+    NSAssert(!self.hasLayoutRelation, @"Attributes should be chained before defining the constraint relation");
+
+    return [self.delegate constraint:self addConstraintWithLayoutAttribute:layoutAttribute];
 }
 
 #pragma mark - Animator proxy
 
 #if TARGET_OS_MAC && !TARGET_OS_IPHONE
 
-- (id<MASConstraint>)animator {
+- (MASConstraint *)animator {
     self.useAnimator = YES;
     return self;
 }
@@ -234,7 +209,7 @@
 
 #pragma mark - debug helpers
 
-- (id<MASConstraint> (^)(id))key {
+- (MASConstraint * (^)(id))key {
     return ^id(id key) {
         self.mas_key = key;
         return self;
@@ -338,7 +313,7 @@
 
     MASLayoutConstraint *existingConstraint = nil;
     if (self.updateExisting) {
-        existingConstraint = [self layoutConstraintSimiliarTo:layoutConstraint];
+        existingConstraint = [self layoutConstraintSimilarTo:layoutConstraint];
     }
     if (existingConstraint) {
         // just update the constant
@@ -348,9 +323,11 @@
         [self.installedView addConstraint:layoutConstraint];
         self.layoutConstraint = layoutConstraint;
     }
+    
+    [firstLayoutItem.mas_installedConstraints addObject:self];
 }
 
-- (MASLayoutConstraint *)layoutConstraintSimiliarTo:(MASLayoutConstraint *)layoutConstraint {
+- (MASLayoutConstraint *)layoutConstraintSimilarTo:(MASLayoutConstraint *)layoutConstraint {
     // check if any constraints are the same apart from the only mutable property constant
 
     // go through constraints in reverse as we do not want to match auto-resizing or interface builder constraints
@@ -361,6 +338,7 @@
         if (existingConstraint.secondItem != layoutConstraint.secondItem) continue;
         if (existingConstraint.firstAttribute != layoutConstraint.firstAttribute) continue;
         if (existingConstraint.secondAttribute != layoutConstraint.secondAttribute) continue;
+        if (existingConstraint.relation != layoutConstraint.relation) continue;
         if (existingConstraint.multiplier != layoutConstraint.multiplier) continue;
         if (existingConstraint.priority != layoutConstraint.priority) continue;
 
@@ -373,6 +351,7 @@
     [self.installedView removeConstraint:self.layoutConstraint];
     self.layoutConstraint = nil;
     self.installedView = nil;
+    [self.firstViewAttribute.view.mas_installedConstraints removeObject:self];
 }
 
 @end

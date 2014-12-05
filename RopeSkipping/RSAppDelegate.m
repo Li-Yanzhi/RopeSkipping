@@ -17,6 +17,8 @@
 #import "RSLocalNotificationManager.h"
 #import <EAIntroView.h>
 #import "RSUserViewController.h"
+#import "RSRecordEntity.h"
+#import "ObjectiveRecord.h"
 
 
 @interface RSAppDelegate() <MSDynamicsDrawerViewControllerDelegate,EAIntroDelegate>
@@ -41,8 +43,10 @@
     // 本地通知
     [[RSLocalNotificationManager shared] down];
     
+#ifdef DEBUG
     // 模拟数据
-//    [self initTestData];
+    [self initTestData];
+#endif
     
     // 视图层初始化
     [self initViewController];
@@ -141,53 +145,53 @@
 
 #pragma mark - private
 // 模拟数据
-//- (void) initTestData{
-//    // 是否清空数据并生成模拟数据
-//#define RECORD_RECREATE 0
-//    // 跳绳时间最小值 s
-//#define RECORD_INTERVAL_MIN 1
-//    // 跳绳时间最大值 s
-//#define RECORD_INTERVAL_MAX 3600
-//    // 跳绳数量最小值
-//#define RECORD_COUNT_MIN 1
-//    // 跳绳数量最大值
-//#define RECORD_COUNT_MAX 999
-//    // 模拟数据的数量,从今天开始往前的天数
-//#define RECORD_NUMBER 40
-//    // 模拟数据出现的几率 算子
-//#define RECORD_RAN 3
-//    // 同一天跳绳的最小次数
-//#define RECORD_ROUND_MIN 1
-//    // 同一天跳绳的最大次数
-//#define RECORD_ROUND_MAX 3
-//    
-//    if (([RSRecordEntity count] == 0) || RECORD_RECREATE) {
-//        [RSRecordEntity deleteAll];
-//        NSDate* today = [NSDate date];
-//        // 今天的数据
-//        RSRecordEntity* record = [RSRecordEntity create];
-//        record.beginTime = @([today timeIntervalSince1970]);
-//        record.time = @([WYRandom randomFrom:RECORD_INTERVAL_MIN to:RECORD_INTERVAL_MAX]);
-//        record.count = @([WYRandom randomFrom:RECORD_COUNT_MIN to:RECORD_COUNT_MAX]);
-//        record.uuid = [[NSUUID UUID]UUIDString];
-//        record.sync = @(NO);
-//        // 随机的数据
-//        for (int i=0;i<RECORD_NUMBER; i++) {
-//            if (arc4random()%RECORD_RAN == 0) {
-//                NSTimeInterval aTimeInterval = [today timeIntervalSinceReferenceDate] + D_DAY * -i;
-//                NSDate *date = [NSDate dateWithTimeIntervalSinceReferenceDate:aTimeInterval];
-//                for (int j=0; j<[WYRandom randomFrom:RECORD_ROUND_MIN to:RECORD_ROUND_MAX]; j++) {
-//                    RSRecordEntity* record = [RSRecordEntity create];
-//                    record.beginTime = @([date timeIntervalSince1970]);
-//                    record.time = @([WYRandom randomFrom:RECORD_INTERVAL_MIN to:RECORD_INTERVAL_MAX]);
-//                    record.count = @([WYRandom randomFrom:RECORD_COUNT_MIN to:RECORD_COUNT_MAX]);
-//                    record.uuid = [[NSUUID UUID]UUIDString];
-//                    record.sync = @(NO);
-//                }
-//            }
-//        }
-//    }
-//}
+- (void) initTestData{
+    // 是否清空数据并生成模拟数据
+#define RECORD_RECREATE 0
+    // 跳绳时间最小值 s
+#define RECORD_INTERVAL_MIN 1
+    // 跳绳时间最大值 s
+#define RECORD_INTERVAL_MAX 3600
+    // 跳绳数量最小值
+#define RECORD_COUNT_MIN 1
+    // 跳绳数量最大值
+#define RECORD_COUNT_MAX 999
+    // 模拟数据的数量,从今天开始往前的天数
+#define RECORD_NUMBER 40
+    // 模拟数据出现的几率 算子
+#define RECORD_RAN 3
+    // 同一天跳绳的最小次数
+#define RECORD_ROUND_MIN 1
+    // 同一天跳绳的最大次数
+#define RECORD_ROUND_MAX 3
+    
+    if (([RSRecordEntity count] == 0) || RECORD_RECREATE) {
+        [RSRecordEntity deleteAll];
+        NSDate* today = [NSDate date];
+        // 今天的数据
+        RSRecordEntity* record = [RSRecordEntity create];
+        record.beginTime = @([today timeIntervalSince1970]);
+        record.time = @([WYRandom randomFrom:RECORD_INTERVAL_MIN to:RECORD_INTERVAL_MAX]);
+        record.count = @([WYRandom randomFrom:RECORD_COUNT_MIN to:RECORD_COUNT_MAX]);
+        record.uuid = [[NSUUID UUID]UUIDString];
+        record.sync = @(NO);
+        // 随机的数据
+        for (int i=0;i<RECORD_NUMBER; i++) {
+            if (arc4random()%RECORD_RAN == 0) {
+                NSTimeInterval aTimeInterval = [today timeIntervalSinceReferenceDate] + D_DAY * -i;
+                NSDate *date = [NSDate dateWithTimeIntervalSinceReferenceDate:aTimeInterval];
+                for (int j=0; j<[WYRandom randomFrom:RECORD_ROUND_MIN to:RECORD_ROUND_MAX]; j++) {
+                    RSRecordEntity* record = [RSRecordEntity create];
+                    record.beginTime = @([date timeIntervalSince1970]);
+                    record.time = @([WYRandom randomFrom:RECORD_INTERVAL_MIN to:RECORD_INTERVAL_MAX]);
+                    record.count = @([WYRandom randomFrom:RECORD_COUNT_MIN to:RECORD_COUNT_MAX]);
+                    record.uuid = [[NSUUID UUID]UUIDString];
+                    record.sync = @(NO);
+                }
+            }
+        }
+    }
+}
 // 视图层初始化
 -(void) initViewController{
     // 欢迎界面

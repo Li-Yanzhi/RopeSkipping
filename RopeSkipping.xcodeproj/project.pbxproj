@@ -392,8 +392,9 @@
 		03E7A7F118B6EE880040E981 /* RSDynamicsDrawerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSDynamicsDrawerViewController.m; sourceTree = "<group>"; };
 		03E7A7F318B6FC9C0040E981 /* right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "right@2x.png"; sourceTree = "<group>"; };
 		03EA90DB18C41A26004F56CB /* modelButtonBack@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "modelButtonBack@2x.png"; sourceTree = "<group>"; };
-		1CCF4518C271443D87098E75 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		5E27437C0E49425BBDA0FEC9 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A9C4C2FAF598B00B1E521E3 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		AA21990919124F2A67683EA8 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -734,7 +735,7 @@
 				03246CDB18890AEB00B72089 /* RopeSkippingTests */,
 				03246CB518890AEB00B72089 /* Frameworks */,
 				03246CB418890AEB00B72089 /* Products */,
-				1CCF4518C271443D87098E75 /* Pods.xcconfig */,
+				80E5BD74188A20E1FFA49B45 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -982,6 +983,15 @@
 			name = MSDynamicsDrawerViewController;
 			sourceTree = "<group>";
 		};
+		80E5BD74188A20E1FFA49B45 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				6A9C4C2FAF598B00B1E521E3 /* Pods.debug.xcconfig */,
+				AA21990919124F2A67683EA8 /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1033,9 +1043,10 @@
 				ORGANIZATIONNAME = Mirror;
 				TargetAttributes = {
 					03246CB218890AEB00B72089 = {
-						DevelopmentTeam = 8Y3CVPXMSU;
+						DevelopmentTeam = 2T4W7AYHBZ;
 					};
 					03246CD318890AEB00B72089 = {
+						DevelopmentTeam = 2T4W7AYHBZ;
 						TestTargetID = 03246CB218890AEB00B72089;
 					};
 				};
@@ -1164,7 +1175,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1354,12 +1365,16 @@
 		};
 		03246CE618890AEB00B72089 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1CCF4518C271443D87098E75 /* Pods.xcconfig */;
+			baseConfigurationReference = 6A9C4C2FAF598B00B1E521E3 /* Pods.debug.xcconfig */;
 			buildSettings = {
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Beijing Coolplay Tribal Technology Co., Ltd (A5QZ63KP44)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Beijing Coolplay Tribal Technology Co., Ltd (A5QZ63KP44)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/ShareSDK/Connection",
@@ -1396,18 +1411,23 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
 		03246CE718890AEB00B72089 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1CCF4518C271443D87098E75 /* Pods.xcconfig */;
+			baseConfigurationReference = AA21990919124F2A67683EA8 /* Pods.release.xcconfig */;
 			buildSettings = {
+				ARCHS = (
+					armv7s,
+					armv7,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Beijing Coolplay Tribal Technology Co., Ltd (A5QZ63KP44)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Beijing Coolplay Tribal Technology Co., Ltd (A5QZ63KP44)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/ShareSDK/Connection",
@@ -1444,6 +1464,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -1453,6 +1474,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/RopeSkipping.app/RopeSkipping";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -1466,6 +1489,7 @@
 				);
 				INFOPLIST_FILE = "RopeSkippingTests/RopeSkippingTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -1476,6 +1500,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/RopeSkipping.app/RopeSkipping";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -1485,6 +1511,7 @@
 				GCC_PREFIX_HEADER = "RopeSkipping/RopeSkipping-Prefix.pch";
 				INFOPLIST_FILE = "RopeSkippingTests/RopeSkippingTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};

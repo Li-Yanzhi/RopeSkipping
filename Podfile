@@ -1,6 +1,6 @@
 platform :ios, "7.0"
 
-pod 'Masonry', '~> 0.3.1'
+pod 'Masonry', '~> 0.5.3'
 pod "NSDate-Extensions", '~> 0.0.1'
 pod "CupertinoYankee", '~> 1.0.0'
 pod 'MSDynamicsDrawerViewController', '~> 1.4.0'
